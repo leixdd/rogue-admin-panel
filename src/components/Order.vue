@@ -26,6 +26,8 @@ const isApproved = ref(false)
 const totalItems = ref(0);
 const currentPage = ref(1);
 
+const statusControl = ref(-1)
+
 const formOrderStatus = ref(0)
 const formOrderRemarks = ref("")
 const formSearchInput = ref("")
@@ -45,7 +47,7 @@ const getOrders = () => {
         body: JSON.stringify({
             adKey: import.meta.env.VITE_ADMIN_KEY,
             page: 1,
-            status: -1,
+            status: statusControl.value,
             uid: formSearchInput.value,
             payment_method: formSearchInput.value,
             remarks: formSearchInput.value,
@@ -63,6 +65,10 @@ const getOrders = () => {
         })
 }
 
+const changeStatus = (status: number) => {
+    statusControl.value = status
+    getOrders()
+}
 
 const updateForm = () => {
     fetch(`${API.value}/updateOrder`, {
@@ -112,6 +118,23 @@ onMounted(() => {
             </v-col>
         </v-row>
 
+        <v-row>
+            <v-col cols="3">
+                <v-btn @click="changeStatus(-1)" color="cyan">ALL</v-btn>
+            </v-col>
+
+            <v-col cols="3">
+                <v-btn @click="changeStatus(0)" color="green">Pending</v-btn>
+            </v-col>
+
+            <v-col cols="3">
+                <v-btn @click="changeStatus(1)" color="blue">Approved</v-btn>
+            </v-col>
+
+            <v-col cols="3">
+                <v-btn @click="changeStatus(2)" color="red">Denied</v-btn>
+            </v-col>
+        </v-row>
         <v-row>
             <v-col cols="8">
                 <v-text-field v-model="formSearchInput" placeholder="Search" hint="Search"></v-text-field>
