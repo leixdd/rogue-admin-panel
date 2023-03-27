@@ -154,7 +154,7 @@ onMounted(() => {
                     </thead>
                     <tbody>
                         <tr v-for="order in orders" :key="order._id">
-                            <td>{{ order.createdAt }}</td>
+                            <td>{{ (new Date(order.createdAt || "")).toLocaleString() }}</td>
                             <td><v-btn color="green-darken-4" @click="openDialog(true, order)">{{ order.amount }} pts</v-btn></td>
                             <td>{{ def_order_status[order.orderStatus] }}</td>
                             <td>{{ order.remarks }}</td>
