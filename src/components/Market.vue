@@ -127,6 +127,33 @@ const updateItem = () => {
 
 }
 
+const deleteItem = () => {
+    fetch(`${API.value}/market/delete`, {
+        method: "POST",
+        mode: "cors",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            code: uTargetModel.value?.code,
+        })
+    })
+    .then(r => r.json())
+    .then(res => {
+        if (res.status) {
+            openUpdateDialog(false, null)
+            Swal.fire("Success", res.message, "success")
+            getAllItems(true)
+        }
+        else{
+            Swal.fire("error", res.message, "error")
+        }
+    })
+    .catch(err => {
+        Swal.fire("error", err.message, "error")
+    })
+}
+
 const openUpdateDialog = (dialog: boolean, model: IItem | null) => {
 
     if(model?.sold) {
@@ -262,6 +289,7 @@ onMounted(() => {
         <v-card>
             <v-card-title>Add new Item</v-card-title>
             <v-card-text>
+                <v-btn @click="deleteItem" color="red" class="mx-3">Delete Item</v-btn>
                 <v-btn @click="openUpdateDialog(false, null)" color="yellow">Close Dialog</v-btn>
                 <div class="form-control">
                     <v-select class="my-4" v-model="uActive" :items="([{value: true, label: 'Open to market (Listed)'}, {value: false, label: 'Remove to market (Unlisted)'}])" item-value="value" item-title="label"></v-select>
