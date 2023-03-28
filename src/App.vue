@@ -8,6 +8,7 @@ const routes = [
   {name: "Home", path: "/"},
   {name: "Orders", path: "/orders"},
   {name: "Market", path: "/market"},
+  {name: "Transactions", path: "/transactions"},
 ]
 </script>
 
