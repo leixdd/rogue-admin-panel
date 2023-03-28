@@ -6,6 +6,7 @@ import Swal from "sweetalert2"
 const API = ref(import.meta.env.VITE_API_URL);
 const orders = ref<IOrder[]>([])
 const def_order_status = ["PENDING", "APPROVED", "DENIED"]
+const def_order_status_color = ["cyan", "green", "red"]
 const form_def_order_status = [{
     value: 0,
     label: "PENDING"
@@ -87,6 +88,8 @@ const updateForm = () => {
         .then(data => {
             if (data.success) {
                alert("Update Successfully")
+               updateDialog(false, false)
+               getOrders()
             }
         })
 }
@@ -103,7 +106,15 @@ const updateDialog = (control: boolean, action: boolean) => {
 
     isApproved.value = action;
     dialogUpdateControl.value = control;
+
+    const tt = targetModel.value?.orderStatus || 0
+
+    if( tt > 0) {
+        formOrderRemarks.value = (targetModel.value?.remarks || "").toString()
+        formOrderStatus.value = Number(targetModel.value?.orderStatus || 0)
+    }
 }
+
 
 onMounted(() => {
     getOrders()
@@ -155,9 +166,9 @@ onMounted(() => {
                     <tbody>
                         <tr v-for="order in orders" :key="order._id">
                             <td>{{ (new Date(order.createdAt || "")).toLocaleString() }}</td>
-                            <td><v-btn color="green-darken-4" @click="openDialog(true, order)">{{ order.amount }} pts</v-btn></td>
-                            <td>{{ def_order_status[order.orderStatus] }}</td>
-                            <td>{{ order.remarks }}</td>
+                            <td><v-btn :color="def_order_status_color[order.orderStatus]" @click="openDialog(true, order)">{{ order.amount }} pts</v-btn></td>
+                            <td :style="{color: def_order_status_color[order.orderStatus]}">{{ def_order_status[order.orderStatus] }}</td>
+                            <td v-html="order.remarks.replaceAll('\n', '<br />')"></td>
                         </tr>
                     </tbody>
                 </v-table>
@@ -177,8 +188,10 @@ onMounted(() => {
             <v-card-title class="text-h4 py-3">Order <b>{{ targetModel?.amount }} pts</b></v-card-title>
             <v-divider></v-divider>
             <v-card-text>
-                <v-btn color="blue" @click="updateDialog(true, true)">Approve Order</v-btn>
-                <v-btn color="red" class="ml-3"  @click="updateDialog(true, false)">Deny Order</v-btn> 
+
+                <v-btn color="cyan" @click="updateDialog(true, false)" v-if="targetModel?.orderStatus !== 0">Check Order</v-btn> 
+                <v-btn color="blue" class="ml-3"  @click="updateDialog(true, true)" v-if="targetModel?.orderStatus === 0">Approve Order</v-btn>
+                <v-btn color="red" class="ml-3"  @click="updateDialog(true, false)" v-if="targetModel?.orderStatus === 0">Deny Order</v-btn> 
                 <v-btn color="yellow" class="ml-3" @click="openDialog(false, null)">Close Dialog</v-btn>
                 <v-list>
                     <v-list-item class="my-2">
@@ -213,21 +226,22 @@ onMounted(() => {
 
     <v-dialog v-model="dialogUpdateControl" persistent width="500px">
         <v-card>
-            <v-card-title>[{{ isApproved ? "Approve" : "Deny" }}] {{ targetModel?.account }} : {{ targetModel?.amount }} pts</v-card-title>
+            <v-card-title v-if="targetModel?.orderStatus !== 0">[{{ isApproved ? "Approve" : "Deny" }}] {{ targetModel?.account }} : {{ targetModel?.amount }} pts</v-card-title>
+            <v-card-title v-else>{{ targetModel?.account }} : {{ targetModel?.amount }} pts</v-card-title>
             <v-card-text>
                 <v-btn @click="updateDialog(false, false)" color="yellow">Close Dialog</v-btn>
 
                 <div class="my-3">
                     <label>Status</label>
-                    <v-select :items="form_def_order_status" v-model="formOrderStatus" item-title="label" item-value="value"></v-select>
+                    <v-select :items="form_def_order_status" v-model="formOrderStatus" item-title="label" item-value="value" :readonly="targetModel?.orderStatus === 0"></v-select>
                 </div>
 
                 <div class="my-3">
                     <label>Remarks</label>
-                    <v-textarea v-model="formOrderRemarks"></v-textarea>
+                    <v-textarea v-model="formOrderRemarks" :readonly="targetModel?.orderStatus !== 0"></v-textarea>
                 </div>
 
-                <v-btn @click="updateForm" class="my-3" color="green">Update</v-btn>
+                <v-btn @click="updateForm" class="my-3" color="green" v-if="targetModel?.orderStatus === 0">Update</v-btn>
             </v-card-text>
         </v-card>
     </v-dialog>
