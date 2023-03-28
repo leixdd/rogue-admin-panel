@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Swal from "sweetalert2";
-import { ref, onMounted } from "vue"
+import { ref, onMounted, watch } from "vue"
 import { IItem } from "../contracts/IItem"
 
 const API = ref(import.meta.env.VITE_API_URL);
@@ -9,6 +9,11 @@ const marketList = ref<IItem[]>([])
 
 //serch
 const searchCode = ref("")
+const seeSoldItems = ref(false)
+
+watch(seeSoldItems, (n, o) => {
+    getAllItems(true)
+})
 
 //newItem
 const cDialog = ref(false)
@@ -43,7 +48,9 @@ const getAllItems = (active: boolean) => {
     .then(r => r.json())
     .then(res => {
         if (res.status) {
-            marketList.value = res.data
+            if(res.data) {
+                marketList.value = (res.data as IItem[]).filter(item => (!item.sold ? true : (seeSoldItems.value) ))
+            }
         }
     })
     .catch(err => {
@@ -121,6 +128,12 @@ const updateItem = () => {
 }
 
 const openUpdateDialog = (dialog: boolean, model: IItem | null) => {
+
+    if(model?.sold) {
+        Swal.fire("Opps", "Item is already been sold", "error")
+        return;
+    }
+
     uDialog.value = dialog
     uTargetModel.value = null
 
@@ -156,7 +169,7 @@ const search = () => {
         if (res.success) {
 
             if(res.data) {
-                marketList.value = [res.data]
+                marketList.value = [res.data].filter(item => (!item.sold ? true : (seeSoldItems.value) ))
                 return;
             }
 
@@ -176,6 +189,8 @@ const clearText = () => {
 }
 
 
+
+
 onMounted(() => {
     getAllItems(true)
 })
@@ -187,6 +202,9 @@ onMounted(() => {
         <v-row>
             <v-col cols="12">
                 <v-btn @click="cDialog = true" large color="green">+ Add new item</v-btn>
+            </v-col>
+            <v-col cols="12">
+                <v-switch v-model="seeSoldItems" label="See Sold items" color="green"></v-switch>
             </v-col>
             <v-col cols="9">
                 <v-text-field v-model="searchCode" large hint="Search By Code" label="Search By Code" clearable @click:clear="clearText"></v-text-field>
