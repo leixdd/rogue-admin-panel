@@ -38,7 +38,8 @@ const selectedServer = ref("SEA")
 
 const targetModel = ref<IOrder | null>(null);
 
-const getOrders = () => {
+const getOrders = (page?: Number | null) => {
+
     fetch(`${API.value}/orders`, {
         method: "POST",
         mode: "cors",
@@ -47,7 +48,7 @@ const getOrders = () => {
         },
         body: JSON.stringify({
             adKey: import.meta.env.VITE_ADMIN_KEY,
-            page: 1,
+            page: page ?? currentPage.value,
             status: statusControl.value,
             uid: formSearchInput.value,
             payment_method: formSearchInput.value,
@@ -115,6 +116,10 @@ const updateDialog = (control: boolean, action: boolean) => {
     }
 }
 
+const controlPage = () => {
+    getOrders()
+}
+
 
 onMounted(() => {
     getOrders()
@@ -125,7 +130,7 @@ onMounted(() => {
         <v-row>
             <v-col cols="4">
                 <v-select v-model="selectedServer" :items="servers" label="Select Server" class="mx-auto"
-                    @update:model-value="getOrders" />
+                    @update:model-value="getOrders(1)" />
             </v-col>
         </v-row>
 
@@ -153,6 +158,16 @@ onMounted(() => {
             <v-col cols="4">
                 <v-btn @click="getOrders" class="btn btn-lg" size="large" color="green-darken-4">Search</v-btn>
             </v-col>
+
+            <v-col cols="12">
+                <v-pagination
+                    :length="(Math.ceil(totalItems / 50))"
+                    v-model="currentPage"
+                    @click="controlPage"
+                    active-color="green"
+                ></v-pagination>
+            </v-col>
+
             <v-col cols="12">
                 <v-table fixed-header>
                     <thead>
@@ -178,6 +193,7 @@ onMounted(() => {
                 <v-pagination
                     :length="(Math.ceil(totalItems / 50))"
                     v-model="currentPage"
+                    @click="controlPage"
                 ></v-pagination>
             </v-col>
         </v-row>

@@ -9,6 +9,7 @@ const routes = [
   {name: "Orders", path: "/orders"},
   {name: "Market", path: "/market"},
   {name: "Transactions", path: "/transactions"},
+  {name: "Streamer Code Data", path: "/streamer-code-data"},
 ]
 </script>
 
