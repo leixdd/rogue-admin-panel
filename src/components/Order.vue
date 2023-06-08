@@ -32,6 +32,7 @@ const statusControl = ref(-1)
 const formOrderStatus = ref(0)
 const formOrderRemarks = ref("")
 const formSearchInput = ref("")
+const formStreamerCode = ref("")
 
 const servers = ["SEA", "CN"]
 const selectedServer = ref("SEA")
@@ -54,7 +55,8 @@ const getOrders = (page?: Number | null) => {
             payment_method: formSearchInput.value,
             remarks: formSearchInput.value,
             amount: formSearchInput.value === "" ? 0 : formSearchInput.value,
-            server: selectedServer.value
+            server: selectedServer.value,
+            streamerCode: formSearchInput.value
 
         })
     })
@@ -174,6 +176,7 @@ onMounted(() => {
                         <tr>
                             <th class="text-left">Date</th>
                             <th class="text-left">Order</th>
+                            <th class="text-left">StreamerCode</th>
                             <th class="text-left">Status</th>
                             <th class="text-left">Remarks</th>
                         </tr>
@@ -182,6 +185,8 @@ onMounted(() => {
                         <tr v-for="order in orders" :key="order._id">
                             <td>{{ (new Date(order.createdAt || "")).toLocaleString() }}</td>
                             <td><v-btn :color="def_order_status_color[order.orderStatus]" @click="openDialog(true, order)">{{ order.amount }} pts</v-btn></td>
+                            <td v-if="order.streamerCode !== ''">{{ order.streamerCode }}</td>
+                            <td v-else><i class="text-disabled">No streamer code</i></td>
                             <td :style="{color: def_order_status_color[order.orderStatus]}">{{ def_order_status[order.orderStatus] }}</td>
                             <td v-html="order.remarks.replaceAll('\n', '<br />')"></td>
                         </tr>
@@ -229,6 +234,10 @@ onMounted(() => {
                     <v-list-item class="my-2">
                         <v-list-item-title>{{ targetModel?.payment_method }}</v-list-item-title>
                         <v-list-item-subtitle>Payment Method</v-list-item-subtitle>
+                    </v-list-item>
+                    <v-list-item class="my-2">
+                        <v-list-item-title>{{ targetModel?.streamerCode }}</v-list-item-title>
+                        <v-list-item-subtitle>Streamer Code</v-list-item-subtitle>
                     </v-list-item>
                 </v-list>
 

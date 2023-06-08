@@ -15,4 +15,5 @@ export interface IOrder {
     orderStatus: number
     remarks: String
     isDeleted: boolean
+    streamerCode: string
 }
